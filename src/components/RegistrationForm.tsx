@@ -58,10 +58,10 @@ export default function RegistrationForm() {
       } else {
         throw new Error(data.message || "Failed to register");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setStatusType("error");
-      setStatusMessage("Something went wrong. Please try again.");
+      setStatusMessage(err.message || "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }

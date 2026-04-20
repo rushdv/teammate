@@ -48,10 +48,10 @@ export default function UnassignedForm() {
       } else {
         throw new Error(data.message || "Failed to add to list");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setStatusType("error");
-      setStatusMessage("Something went wrong. Please try again.");
+      setStatusMessage(err.message || "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
