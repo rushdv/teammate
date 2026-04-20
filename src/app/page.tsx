@@ -14,12 +14,8 @@ export default function Home() {
             <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
-                  Team Registration Portal
+                  TeamMate
                 </h1>
-              </div>
-              <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-400">
-                <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Connected to MongoDB</span>
               </div>
             </header>
 
