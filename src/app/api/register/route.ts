@@ -25,9 +25,21 @@ export async function POST(request: Request) {
 
     const { teamName, members } = await request.json();
 
+    // Validate members have both name and studentId
+    const validMembers = members.filter((m: any) => 
+      m.name && m.name.trim() !== '' && m.studentId && m.studentId.trim() !== ''
+    );
+
+    if (validMembers.length === 0) {
+      return NextResponse.json(
+        { message: 'At least one member with name and student ID is required' },
+        { status: 400 }
+      );
+    }
+
     const team = await Team.create({
       teamName,
-      members: members.filter((m: string) => m.trim() !== ''),
+      members: validMembers,
     });
 
     return NextResponse.json({ status: 'ok', data: team }, { status: 201 });

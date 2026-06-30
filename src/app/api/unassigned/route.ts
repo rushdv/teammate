@@ -5,9 +5,23 @@ import Unassigned from '@/models/Unassigned';
 export async function POST(request: Request) {
   try {
     await dbConnect();
-    const { name } = await request.json();
+    const { name, studentId } = await request.json();
 
-    const entry = await Unassigned.create({ name });
+    if (!name || !name.trim()) {
+      return NextResponse.json(
+        { message: 'Name is required' },
+        { status: 400 }
+      );
+    }
+
+    if (!studentId || !studentId.trim()) {
+      return NextResponse.json(
+        { message: 'Student ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const entry = await Unassigned.create({ name: name.trim(), studentId: studentId.trim() });
 
     return NextResponse.json({ status: 'ok', data: entry }, { status: 201 });
   } catch (error: any) {

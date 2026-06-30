@@ -2,11 +2,13 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IUnassigned extends Document {
   name: string;
+  studentId: string;
   createdAt: Date;
 }
 
 const UnassignedSchema: Schema = new Schema({
   name: { type: String, required: true },
+  studentId: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 

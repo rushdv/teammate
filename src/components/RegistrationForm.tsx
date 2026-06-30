@@ -13,9 +13,19 @@ const MEMBER_LABELS = ["1st member", "2nd member", "3rd member", "4th member"];
 
 type StatusType = "idle" | "info" | "success" | "error";
 
+interface Member {
+  name: string;
+  studentId: string;
+}
+
 export default function RegistrationForm() {
   const [teamName, setTeamName] = useState("");
-  const [members, setMembers] = useState(["", "", "", ""]);
+  const [members, setMembers] = useState<Member[]>([
+    { name: "", studentId: "" },
+    { name: "", studentId: "" },
+    { name: "", studentId: "" },
+    { name: "", studentId: "" },
+  ]);
   const [submitting, setSubmitting] = useState(false);
   const [statusType, setStatusType] = useState<StatusType>("idle");
   const [statusMessage, setStatusMessage] = useState(
@@ -24,9 +34,9 @@ export default function RegistrationForm() {
 
   const isLocked = statusType === "success";
 
-  const handleMemberChange = (index: number, value: string) => {
+  const handleMemberChange = (index: number, field: "name" | "studentId", value: string) => {
     const next = [...members];
-    next[index] = value;
+    next[index][field] = value;
     setMembers(next);
   };
 
@@ -39,6 +49,23 @@ export default function RegistrationForm() {
       return;
     }
 
+    // Filter out empty members
+    const filledMembers = members.filter(m => m.name.trim() !== "" || m.studentId.trim() !== "");
+    
+    // Validate that filled members have both name and student ID
+    const invalidMembers = filledMembers.filter(m => !m.name.trim() || !m.studentId.trim());
+    if (invalidMembers.length > 0) {
+      setStatusType("error");
+      setStatusMessage("Please fill in both name and student ID for each member.");
+      return;
+    }
+
+    if (filledMembers.length === 0) {
+      setStatusType("error");
+      setStatusMessage("Please add at least one team member.");
+      return;
+    }
+
     setSubmitting(true);
     setStatusType("info");
     setStatusMessage("Submitting your registration...");
@@ -47,7 +74,7 @@ export default function RegistrationForm() {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ teamName, members }),
+        body: JSON.stringify({ teamName, members: filledMembers }),
       });
 
       const data = await res.json();
@@ -106,18 +133,28 @@ export default function RegistrationForm() {
             Team Members
             <span className="ml-2 text-xs font-normal text-slate-400">(minimum 1 member)</span>
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-4">
             {MEMBER_LABELS.map((label, idx) => (
-              <div key={idx} className="space-y-1.5">
-                <span className="block text-xs text-slate-400">{label}</span>
-                <input
-                  type="text"
-                  value={members[idx]}
-                  onChange={(e) => handleMemberChange(idx, e.target.value)}
-                  disabled={submitting || isLocked}
-                  placeholder="Full name"
-                  className="w-full rounded-2xl bg-slate-900/70 border border-slate-700/80 px-3.5 py-2 text-sm placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-accent-400 focus:ring-2 focus:ring-accent-500/70 shadow-sm disabled:opacity-50"
-                />
+              <div key={idx} className="space-y-2 p-3 rounded-xl bg-slate-900/40 border border-slate-800/50">
+                <span className="block text-xs font-medium text-slate-400">{label}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={members[idx].name}
+                    onChange={(e) => handleMemberChange(idx, "name", e.target.value)}
+                    disabled={submitting || isLocked}
+                    placeholder="Full name"
+                    className="w-full rounded-xl bg-slate-900/70 border border-slate-700/80 px-3.5 py-2 text-sm placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-accent-400 focus:ring-2 focus:ring-accent-500/70 shadow-sm disabled:opacity-50"
+                  />
+                  <input
+                    type="text"
+                    value={members[idx].studentId}
+                    onChange={(e) => handleMemberChange(idx, "studentId", e.target.value)}
+                    disabled={submitting || isLocked}
+                    placeholder="Student ID"
+                    className="w-full rounded-xl bg-slate-900/70 border border-slate-700/80 px-3.5 py-2 text-sm placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-accent-400 focus:ring-2 focus:ring-accent-500/70 shadow-sm disabled:opacity-50"
+                  />
+                </div>
               </div>
             ))}
           </div>

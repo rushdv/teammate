@@ -13,6 +13,7 @@ type StatusType = "idle" | "info" | "success" | "error";
 
 export default function UnassignedForm() {
   const [name, setName] = useState("");
+  const [studentId, setStudentId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [statusType, setStatusType] = useState<StatusType>("idle");
   const [statusMessage, setStatusMessage] = useState(
@@ -28,6 +29,12 @@ export default function UnassignedForm() {
       return;
     }
 
+    if (!studentId.trim()) {
+      setStatusType("error");
+      setStatusMessage("Please enter your student ID.");
+      return;
+    }
+
     setSubmitting(true);
     setStatusType("info");
     setStatusMessage("Adding you to the unassigned list...");
@@ -36,7 +43,7 @@ export default function UnassignedForm() {
       const res = await fetch("/api/unassigned", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim() }),
+        body: JSON.stringify({ name: name.trim(), studentId: studentId.trim() }),
       });
 
       const data = await res.json();
@@ -45,6 +52,7 @@ export default function UnassignedForm() {
         setStatusType("success");
         setStatusMessage("You have been added to the unassigned list.");
         setName("");
+        setStudentId("");
       } else {
         throw new Error(data.message || "Failed to add to list");
       }
@@ -85,6 +93,18 @@ export default function UnassignedForm() {
             onChange={(e) => setName(e.target.value)}
             disabled={submitting}
             placeholder="Enter your full name"
+            className="w-full rounded-2xl bg-slate-900/70 border border-slate-700/80 px-4 py-2.5 text-sm placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-accent-400 focus:ring-2 focus:ring-accent-500/70 shadow-sm disabled:opacity-50"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-slate-200">Student ID</label>
+          <input
+            type="text"
+            value={studentId}
+            onChange={(e) => setStudentId(e.target.value)}
+            disabled={submitting}
+            placeholder="Enter your student ID"
             className="w-full rounded-2xl bg-slate-900/70 border border-slate-700/80 px-4 py-2.5 text-sm placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-accent-400 focus:ring-2 focus:ring-accent-500/70 shadow-sm disabled:opacity-50"
           />
         </div>

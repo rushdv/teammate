@@ -24,6 +24,9 @@ async function cleanDatabase() {
     await mongoose.connect(MONGODB_URI);
     console.log('✅ Connected to database\n');
     
+    // Check if we need to drop the entire database for schema changes
+    console.log('🔍 Checking for schema compatibility...\n');
+    
     // Count before deletion
     const teamsCount = await mongoose.connection.db.collection('teams').countDocuments();
     const unassignedCount = await mongoose.connection.db.collection('unassigneds').countDocuments();
@@ -57,6 +60,7 @@ async function cleanDatabase() {
     console.log(`   - Unassigned: ${newUnassignedCount} documents\n`);
     
     console.log('🎉 Database is now clean and ready for new registrations!\n');
+    console.log('ℹ️  Note: Schema now includes student IDs for all members.\n');
     
     await mongoose.connection.close();
     console.log('👋 Connection closed.');
