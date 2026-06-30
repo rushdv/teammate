@@ -6,10 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:clean": "node scripts/clean-database.js",
+    "db:backup-clean": "node scripts/backup-and-clean.js"
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "dotenv": "^17.4.2",
     "lucide-react": "^0.468.0",
     "mongoose": "^8.8.4",
     "next": "^15.5.15",

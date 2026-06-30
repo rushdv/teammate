@@ -9,13 +9,13 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const MEMBER_LABELS = ["1st member", "2nd member", "3rd member"];
+const MEMBER_LABELS = ["1st member", "2nd member", "3rd member", "4th member"];
 
 type StatusType = "idle" | "info" | "success" | "error";
 
 export default function RegistrationForm() {
   const [teamName, setTeamName] = useState("");
-  const [members, setMembers] = useState(["", "", ""]);
+  const [members, setMembers] = useState(["", "", "", ""]);
   const [submitting, setSubmitting] = useState(false);
   const [statusType, setStatusType] = useState<StatusType>("idle");
   const [statusMessage, setStatusMessage] = useState(
