@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, CheckCircle2, XCircle, Info } from "lucide-react";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { Loader2, UserPlus } from "lucide-react";
 
 type StatusType = "idle" | "info" | "success" | "error";
 
@@ -16,28 +10,26 @@ export default function UnassignedForm() {
   const [studentId, setStudentId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [statusType, setStatusType] = useState<StatusType>("idle");
-  const [statusMessage, setStatusMessage] = useState(
-    "If you don't have a team yet, join the unassigned list."
-  );
+  const [statusMessage, setStatusMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!name.trim()) {
       setStatusType("error");
-      setStatusMessage("Please enter your name.");
+      setStatusMessage("Name required");
       return;
     }
 
     if (!studentId.trim()) {
       setStatusType("error");
-      setStatusMessage("Please enter your student ID.");
+      setStatusMessage("Student ID required");
       return;
     }
 
     setSubmitting(true);
     setStatusType("info");
-    setStatusMessage("Adding you to the unassigned list...");
+    setStatusMessage("Adding...");
 
     try {
       const res = await fetch("/api/unassigned", {
@@ -50,99 +42,106 @@ export default function UnassignedForm() {
 
       if (res.ok) {
         setStatusType("success");
-        setStatusMessage("You have been added to the unassigned list.");
+        setStatusMessage("Added successfully!");
         setName("");
         setStudentId("");
       } else {
-        throw new Error(data.message || "Failed to add to list");
+        throw new Error(data.message || "Failed to add");
       }
     } catch (err: any) {
       console.error(err);
       setStatusType("error");
-      setStatusMessage(err.message || "Something went wrong. Please try again.");
+      setStatusMessage(err.message || "Something went wrong");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const announcementStyles = {
-    idle: "border-slate-700/60 bg-slate-900/60",
-    info: "border-slate-600/80 bg-slate-900/70",
-    success: "border-emerald-500/70 bg-emerald-900/30 text-emerald-100 shadow-lg shadow-emerald-500/20",
-    error: "border-red-500/70 bg-red-900/30 text-red-100 shadow-lg shadow-red-500/20",
-  };
-
-  const StatusIcon = () => {
-    switch (statusType) {
-      case "success": return <CheckCircle2 className="h-5 w-5 text-emerald-400" />;
-      case "error": return <XCircle className="h-5 w-5 text-red-400" />;
-      case "info": return <Loader2 className="h-5 w-5 text-slate-400 animate-spin" />;
-      default: return <Info className="h-5 w-5 text-slate-400" />;
-    }
-  };
-
   return (
-    <div className="space-y-4 lg:border-l lg:border-slate-800/70 lg:pl-6">
-      <h2 className="text-lg font-medium text-slate-100">Don’t have a team yet?</h2>
+    <div className="bg-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-800/50 p-4 sm:p-5">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-800/50">
+        <div className="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center">
+          <UserPlus className="w-4 h-4 text-purple-400" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-white">Join as Individual</h2>
+          <p className="text-xs text-slate-500">No team yet?</p>
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-200">Your Name</label>
+        {/* Name */}
+        <div>
+          <label className="block text-xs font-medium text-slate-300 mb-1.5">
+            Your Name <span className="text-red-400">*</span>
+          </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={submitting}
             placeholder="Enter your full name"
-            className="w-full rounded-2xl bg-slate-900/70 border border-slate-700/80 px-4 py-2.5 text-sm placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-accent-400 focus:ring-2 focus:ring-accent-500/70 shadow-sm disabled:opacity-50"
+            className="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700/50 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all disabled:opacity-50"
           />
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-200">Student ID</label>
+        {/* Student ID */}
+        <div>
+          <label className="block text-xs font-medium text-slate-300 mb-1.5">
+            Student ID <span className="text-red-400">*</span>
+          </label>
           <input
             type="text"
             value={studentId}
             onChange={(e) => setStudentId(e.target.value)}
             disabled={submitting}
             placeholder="Enter your student ID"
-            className="w-full rounded-2xl bg-slate-900/70 border border-slate-700/80 px-4 py-2.5 text-sm placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-accent-400 focus:ring-2 focus:ring-accent-500/70 shadow-sm disabled:opacity-50"
+            className="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700/50 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all disabled:opacity-50"
           />
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={submitting}
-          className="relative inline-flex items-center justify-center w-full px-5 py-2.5 text-sm font-medium rounded-2xl overflow-hidden border border-slate-600/80 bg-slate-900/80 text-slate-100 shadow-md transition-all duration-200 hover:-translate-y-[1px] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-slate-500/80 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          <span className="relative flex items-center gap-2">
-            {submitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Adding...</span>
-              </>
-            ) : (
-              <span>Join Unassigned List</span>
-            )}
-          </span>
+          {submitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Adding...</span>
+            </>
+          ) : (
+            <>
+              <UserPlus className="w-4 h-4" />
+              <span>Join List</span>
+            </>
+          )}
         </button>
+
+        {/* Status Message */}
+        {statusMessage && (
+          <div
+            className={`px-3 py-2 rounded-lg text-xs font-medium ${
+              statusType === "success"
+                ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                : statusType === "error"
+                ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+            }`}
+          >
+            {statusMessage}
+          </div>
+        )}
       </form>
 
-      <section className={cn(
-        "mt-2 rounded-2xl border px-4 py-3 text-xs sm:text-sm flex items-start gap-3 transition-all duration-300",
-        announcementStyles[statusType]
-      )}>
-        <div className="mt-[1px]">
-          <StatusIcon />
-        </div>
-        <div className="space-y-1">
-          <p className="font-medium">
-            {statusType === "success" ? "Added to unassigned list" :
-             statusType === "error" ? "Failed to add" :
-             statusType === "info" ? "Processing..." : "Unassigned info"}
-          </p>
-          <p className="text-slate-200/90">{statusMessage}</p>
-        </div>
-      </section>
+      {/* Info Box */}
+      <div className="mt-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/30">
+        <p className="text-xs text-slate-400 leading-relaxed">
+          💡 We'll help you find a team later
+        </p>
+      </div>
     </div>
   );
 }

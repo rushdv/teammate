@@ -1,15 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, CheckCircle2, XCircle, Info } from "lucide-react";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { Loader2, Users } from "lucide-react";
 
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
-const MEMBER_LABELS = ["1st member", "2nd member", "3rd member", "4th member"];
+const MEMBER_LABELS = ["1st", "2nd", "3rd", "4th"];
 
 type StatusType = "idle" | "info" | "success" | "error";
 
@@ -28,9 +22,7 @@ export default function RegistrationForm() {
   ]);
   const [submitting, setSubmitting] = useState(false);
   const [statusType, setStatusType] = useState<StatusType>("idle");
-  const [statusMessage, setStatusMessage] = useState(
-    "Register your team to join the portal."
-  );
+  const [statusMessage, setStatusMessage] = useState("");
 
   const isLocked = statusType === "success";
 
@@ -45,30 +37,28 @@ export default function RegistrationForm() {
 
     if (!teamName.trim()) {
       setStatusType("error");
-      setStatusMessage("Please fill in your team name.");
+      setStatusMessage("Team name required");
       return;
     }
 
-    // Filter out empty members
     const filledMembers = members.filter(m => m.name.trim() !== "" || m.studentId.trim() !== "");
-    
-    // Validate that filled members have both name and student ID
     const invalidMembers = filledMembers.filter(m => !m.name.trim() || !m.studentId.trim());
+    
     if (invalidMembers.length > 0) {
       setStatusType("error");
-      setStatusMessage("Please fill in both name and student ID for each member.");
+      setStatusMessage("Fill both name and ID for each member");
       return;
     }
 
     if (filledMembers.length === 0) {
       setStatusType("error");
-      setStatusMessage("Please add at least one team member.");
+      setStatusMessage("Add at least one member");
       return;
     }
 
     setSubmitting(true);
     setStatusType("info");
-    setStatusMessage("Submitting your registration...");
+    setStatusMessage("Submitting...");
 
     try {
       const res = await fetch("/api/register", {
@@ -81,70 +71,62 @@ export default function RegistrationForm() {
 
       if (res.ok) {
         setStatusType("success");
-        setStatusMessage(`Team "${teamName}" is successfully registered.`);
+        setStatusMessage(`Team registered successfully!`);
       } else {
-        throw new Error(data.message || "Failed to register");
+        throw new Error(data.message || "Registration failed");
       }
     } catch (err: any) {
       console.error(err);
       setStatusType("error");
-      setStatusMessage(err.message || "Something went wrong. Please try again.");
+      setStatusMessage(err.message || "Something went wrong");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const announcementStyles = {
-    idle: "border-slate-700/60 bg-slate-900/60",
-    info: "border-slate-600/80 bg-slate-900/70",
-    success: "border-emerald-500/70 bg-emerald-900/30 text-emerald-100 shadow-lg shadow-emerald-500/20",
-    error: "border-red-500/70 bg-red-900/30 text-red-100 shadow-lg shadow-red-500/20",
-  };
-
-  const StatusIcon = () => {
-    switch (statusType) {
-      case "success": return <CheckCircle2 className="h-5 w-5 text-emerald-400" />;
-      case "error": return <XCircle className="h-5 w-5 text-red-400" />;
-      case "info": return <Loader2 className="h-5 w-5 text-slate-400 animate-spin" />;
-      default: return <Info className="h-5 w-5 text-slate-400" />;
-    }
-  };
-
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-medium text-slate-100">Register Your Team</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-200">
-            Team Name <span className="text-emerald-400">*</span>
+    <div className="bg-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-800/50 p-4 sm:p-5">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-800/50">
+        <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center">
+          <Users className="w-4 h-4 text-blue-400" />
+        </div>
+        <h2 className="text-lg font-semibold text-white">Team Registration</h2>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Team Name */}
+        <div>
+          <label className="block text-xs font-medium text-slate-300 mb-1.5">
+            Team Name <span className="text-red-400">*</span>
           </label>
           <input
             type="text"
             value={teamName}
             onChange={(e) => setTeamName(e.target.value)}
             disabled={submitting || isLocked}
-            placeholder="Enter your team name"
-            className="w-full rounded-2xl bg-slate-900/70 border border-slate-700/80 px-4 py-2.5 text-sm sm:text-base placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-accent-400 focus:ring-2 focus:ring-accent-500/70 shadow-sm disabled:opacity-50"
+            placeholder="Enter team name"
+            className="w-full px-3 py-2.5 bg-slate-800/50 border border-slate-700/50 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all disabled:opacity-50"
           />
         </div>
 
-        <div className="space-y-3">
-          <p className="text-sm font-medium text-slate-200">
-            Team Members
-            <span className="ml-2 text-xs font-normal text-slate-400">(minimum 1 member)</span>
-          </p>
-          <div className="grid grid-cols-1 gap-4">
+        {/* Members - Stacked Layout */}
+        <div>
+          <label className="block text-xs font-medium text-slate-300 mb-2">
+            Team Members <span className="text-slate-500 text-xs font-normal">(min 1)</span>
+          </label>
+          <div className="space-y-3">
             {MEMBER_LABELS.map((label, idx) => (
-              <div key={idx} className="space-y-2 p-3 rounded-xl bg-slate-900/40 border border-slate-800/50">
-                <span className="block text-xs font-medium text-slate-400">{label}</span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div key={idx}>
+                <div className="text-xs font-medium text-slate-500 mb-1.5">{label} member</div>
+                <div className="space-y-1.5">
                   <input
                     type="text"
                     value={members[idx].name}
                     onChange={(e) => handleMemberChange(idx, "name", e.target.value)}
                     disabled={submitting || isLocked}
                     placeholder="Full name"
-                    className="w-full rounded-xl bg-slate-900/70 border border-slate-700/80 px-3.5 py-2 text-sm placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-accent-400 focus:ring-2 focus:ring-accent-500/70 shadow-sm disabled:opacity-50"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all disabled:opacity-50"
                   />
                   <input
                     type="text"
@@ -152,7 +134,7 @@ export default function RegistrationForm() {
                     onChange={(e) => handleMemberChange(idx, "studentId", e.target.value)}
                     disabled={submitting || isLocked}
                     placeholder="Student ID"
-                    className="w-full rounded-xl bg-slate-900/70 border border-slate-700/80 px-3.5 py-2 text-sm placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-accent-400 focus:ring-2 focus:ring-accent-500/70 shadow-sm disabled:opacity-50"
+                    className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -160,47 +142,39 @@ export default function RegistrationForm() {
           </div>
         </div>
 
-        <div className="pt-2">
-          <button
-            type="submit"
-            disabled={submitting || isLocked}
-            className="relative inline-flex items-center justify-center w-full sm:w-auto px-6 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-medium rounded-2xl overflow-hidden border border-emerald-500/70 bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/30 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-xl hover:shadow-emerald-400/40 focus:outline-none focus:ring-2 focus:ring-emerald-400/80 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <span className="relative flex items-center gap-2">
-              {submitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Submitting...</span>
-                </>
-              ) : isLocked ? (
-                <>
-                  <span>Registered</span>
-                  <span className="text-xs text-slate-900/80">(locked)</span>
-                </>
-              ) : (
-                <span>Register Team</span>
-              )}
-            </span>
-          </button>
-        </div>
-      </form>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={submitting || isLocked}
+          className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Submitting...</span>
+            </>
+          ) : isLocked ? (
+            <span>✓ Registered</span>
+          ) : (
+            <span>Register Team</span>
+          )}
+        </button>
 
-      <section className={cn(
-        "mt-4 rounded-2xl border px-4 py-3 sm:px-5 sm:py-4 text-sm flex items-start gap-3 transition-all duration-300",
-        announcementStyles[statusType]
-      )}>
-        <div className="mt-[1px]">
-          <StatusIcon />
-        </div>
-        <div className="space-y-1">
-          <p className="font-medium">
-            {statusType === "success" ? "Registration successful" :
-             statusType === "error" ? "Registration failed" :
-             statusType === "info" ? "Processing..." : "Announcement"}
-          </p>
-          <p className="text-slate-200/90 text-xs sm:text-sm">{statusMessage}</p>
-        </div>
-      </section>
+        {/* Status Message */}
+        {statusMessage && (
+          <div
+            className={`px-3 py-2 rounded-lg text-xs font-medium ${
+              statusType === "success"
+                ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                : statusType === "error"
+                ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+            }`}
+          >
+            {statusMessage}
+          </div>
+        )}
+      </form>
     </div>
   );
 }
